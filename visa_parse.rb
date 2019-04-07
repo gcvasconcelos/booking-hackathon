@@ -2,21 +2,22 @@ require 'csv'
 load 'country_parse.rb'
 
 def get_visa_requirements(country_id, target_country_id)
-  matrix = CSV.read("./passport-index-iso2-matrix.csv", headers: true)
-  indexes = country_parse('all.json')
+  matrix = CSV.read('passport-index-iso2-matrix.csv')
+
+  indexes = matrix[0].each { |country| country.downcase! }
 
   country_id_index = indexes.find_index(country_id)
-  visa_requirements = matrix[country_id_index][target_country_id]
+  target_country_id_index = indexes.find_index(target_country_id)
+
+  visa_requirements = matrix[country_id_index+1][target_country_id_index+1].to_i
   
   requirements_options = [
-    "visa-free travel",
-    "eTA is required",
-    "visa can be obtained on arrival (which Passport Index considers visa-free)",
+    "for all instances where passport and destination are the same",
     "visa is required",
-    "for all instances where passport and destination are the same"
+    "visa can be obtained on arrival (which Passport Index considers visa-free)",
+    "eTA is required",
+    "visa-free travel"
   ]
 
-  requirements_options[visa_requirements+1]
+  requirements_options[visa_requirements + 1]
 end
-
-puts foo = get_visa_requirements('br','jp')
