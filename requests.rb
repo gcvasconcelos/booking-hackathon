@@ -32,10 +32,6 @@ def get_hotel_info(hotel)
   hotel_info
 end
 
-foo = get_hotels_facilities_by_city_id(-2140479)
-puts get_hotel_info(foo[5])
-
-
 def get_hotels_by_city_id(country_id)
   offset = 0
   hotel_ids = []
@@ -66,4 +62,4 @@ def check_hotel_availability(checkin, checkout, city_id, room_code)
   hotels_response["result"]
 end
 
-foo = check_hotel_availability("2019-04-08", "2019-04-10", "-1565670", "A,A")
+# foo = check_hotel_availability("2019-04-08", "2019-04-10", "-1565670", "A,A")
