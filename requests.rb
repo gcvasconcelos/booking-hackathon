@@ -43,3 +43,19 @@ def get_hotels_by_country_id(country_id)
   end
   hotel_ids
 end
+
+
+puts 'Alemanha'
+foo = get_hotels_by_country_id('de')
+goo = get_hotels_facilities_by_country_id(25, 'de')
+puts foo.length + ' ' + goo.length
+
+puts 'Holanda'
+foo = get_hotels_by_country_id('nl')
+goo = get_hotels_facilities_by_country_id(25, 'nl')
+puts foo.length + ' ' + goo.length
+
+puts 'Japão'
+foo = get_hotels_by_country_id('jp')
+goo = get_hotels_facilities_by_country_id(25, 'jp')
+puts foo.length + ' ' + goo.length

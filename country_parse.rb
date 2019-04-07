@@ -1,3 +1,5 @@
+require 'json'
+
 def country_parse(file_name)
   file = File.read(file_name)
   countries = JSON.parse(file)
