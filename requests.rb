@@ -43,9 +43,3 @@ def get_hotels_by_country_id(country_id)
   end
   hotel_ids
 end
-
-# 25: 'Facilities for disabled guests'
-accessible_hotels = get_hotels_facilities_by_country_id(25, 'nl')
-city_hotels = get_hotels_by_country_id('nl')
-puts city_hotels.length
-puts accessible_hotels.length
