@@ -21,16 +21,20 @@ def get_hotels_facilities_by_city_id(city_id)
   hotels_array[0]
 end
 
-def get_hotel_info(hotel)
-  hotel_info = []
-  hotel_info << url = hotel["hotel_data"]["url"]
-  hotel_info << name = hotel["hotel_data"]["name"]
-  hotel_info << address = hotel["hotel_data"]["address"]
-  hotel_info << location = hotel["hotel_data"]["location"]
-  hotel_info << review_score = hotel["hotel_data"]["review_score"]
+def get_top_hotel_url(hotels)
+  parsed_top_five_hotels = []
+
+  top_five_hotels = hotels.max_by(5) { |hotel| hotel["hotel_data"]["review_score"] ? hotel["hotel_data"]["review_score"] : 0 }
   
-  hotel_info
+  top_five_hotels.each do |hotel|
+    parsed_top_five_hotels << {'name': hotel["hotel_data"]['name'], 'url': hotel["hotel_data"]['url']}
+  end
+
+  parsed_top_five_hotels
 end
+
+foo = get_hotels_facilities_by_city_id(-2140479)
+puts get_top_hotel_url(foo)
 
 def get_hotels_by_city_id(city_id)
   offset = 0
@@ -48,7 +52,7 @@ def get_hotels_by_city_id(city_id)
     hotels_array << hotels_response["result"]
     offset += 1000
   end
-  
+
   hotels_array[0]
 end
 
