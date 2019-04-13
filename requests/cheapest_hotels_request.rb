@@ -20,24 +20,24 @@ def get_accessible_hotels_by_city_id(city_id)
 
 	hotels_array[0]
 end
-  
-def get_best_hotels_by_city_id(city_id)
-	top_hotels = []
+
+def get_cheapest_hotels_by_city_id(city_id)
+	cheapest_hotels = []
 
 	hotels = get_accessible_hotels_by_city_id(city_id)
 
-	top_five_hotels = hotels.max_by(3) { |hotel| hotel["hotel_data"]["review_score"] ? hotel["hotel_data"]["review_score"] : 0 }
+	top_five_hotels = hotels.min_by(3) { |hotel| hotel["room_data"][0]["room_info"]["max_price"] }
 
 	top_five_hotels.each do |hotel|
-		top_hotels << { 'name': hotel["hotel_data"]['name'], 
-										'url': hotel["hotel_data"]['url'], 
-										'photo_url': hotel["hotel_data"]["hotel_photos"][0]["url_original"],
-										'price': hotel["room_data"][0]["room_info"]["min_price"],
-										'currency': hotel["hotel_data"]['currency']
-									}
+		cheapest_hotels << {  'name': hotel["hotel_data"]['name'], 
+													'url': hotel["hotel_data"]['url'], 
+													'photo_url': hotel["hotel_data"]["hotel_photos"][0]["url_original"],
+													'price': hotel["room_data"][0]["room_info"]["min_price"],
+													'currency': hotel["hotel_data"]['currency']
+												}
+	end
+
+	cheapest_hotels
 end
 
-	top_hotels
-end
-
-#   puts get_best_hotels_by_city_id(-2140479)
+# puts get_cheapest_hotels_by_city_id(-2140479)
