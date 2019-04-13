@@ -1,9 +1,10 @@
 require 'csv'
-load 'country_parse.rb'
+require 'rest-client'
+require 'json'
 
 def get_country_id(country_name)
-  file = File.read('resources/countries-data.json')
-  countries = JSON.parse(file)
+  response = RestClient.get('https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.json')
+  countries = JSON.parse(response)
 
   country =  countries.find { |country| country['name'] == country_name}
 
@@ -11,16 +12,17 @@ def get_country_id(country_name)
 end
 
 def get_visa_requirements(country_name, target_country_id)
-  matrix = CSV.read('resources/passport-index-iso2-matrix.csv')
+  response = RestClient.get('https://s3.amazonaws.com/dream-team-booking/visa.csv')
+  visa_data = CSV.parse(response)
 
-  indexes = matrix[0].each { |country| country.downcase! }
+  indexes = visa_data[0].each { |country| country.downcase! }
 
   country_id = get_country_id(country_name)
 
   country_id_index = indexes.find_index(country_id)
   target_country_id_index = indexes.find_index(target_country_id)
 
-  visa_requirements = matrix[country_id_index+1][target_country_id_index+1].to_i
+  visa_requirements = visa_data[country_id_index+1][target_country_id_index+1].to_i
   
   requirements_options = [
     "for all instances where passport and destination are the same",
