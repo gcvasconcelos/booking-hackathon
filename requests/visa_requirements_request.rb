@@ -2,7 +2,7 @@ require 'csv'
 load 'country_parse.rb'
 
 def get_visa_requirements(country_id, target_country_id)
-  matrix = CSV.read('passport-index-iso2-matrix.csv')
+  matrix = CSV.read('resources/passport-index-iso2-matrix.csv')
 
   indexes = matrix[0].each { |country| country.downcase! }
 
@@ -21,3 +21,5 @@ def get_visa_requirements(country_id, target_country_id)
 
   requirements_options[visa_requirements + 1]
 end
+
+puts get_visa_requirements('br', 'us')
