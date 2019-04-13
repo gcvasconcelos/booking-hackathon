@@ -22,4 +22,4 @@ def get_visa_requirements(country_id, target_country_id)
   requirements_options[visa_requirements + 1]
 end
 
-puts get_visa_requirements('br', 'us')
+# puts get_visa_requirements('br', 'us')
