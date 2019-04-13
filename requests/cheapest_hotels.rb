@@ -27,8 +27,8 @@ def get_cheapest_hotels_by_city_id(city_id)
 	cheapest_hotels = []
 
 	hotels = get_accessible_hotels_by_city_id(city_id)
-	hotels = hotels.delete_if { |hotel| hotel["room_data"][0]["room_info"]["max_price"] == 0 }
-	cheapest_hotels_hash = hotels.min_by(3) { |hotel| hotel["room_data"][0]["room_info"]["max_price"] }
+	hotels = hotels.delete_if { |hotel| hotel["room_data"][0]["room_info"]["min_price"] == 0 }
+	cheapest_hotels_hash = hotels.min_by(3) { |hotel| hotel["room_data"][0]["room_info"]["min_price"] }
 
 	cheapest_hotels_hash.each do |hotel|
 		cheapest_hotels << {   	
@@ -44,4 +44,4 @@ def get_cheapest_hotels_by_city_id(city_id)
 end
 
 # usage example using Amsterdam code
-puts get_cheapest_hotels_by_city_id(-246227)
+puts get_cheapest_hotels_by_city_id(-2140479)
