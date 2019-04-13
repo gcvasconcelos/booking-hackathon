@@ -2,6 +2,7 @@ require 'csv'
 require 'rest-client'
 require 'json'
 
+# return iso2 country code by coutry name 
 def get_country_id(country_name)
   response = RestClient.get('https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.json')
   countries = JSON.parse(response)
@@ -11,6 +12,7 @@ def get_country_id(country_name)
   country["alpha-2"].downcase
 end
 
+# return an array with the visa requirement between two countries 
 def get_visa_requirements(country_name, target_country_id)
   response = RestClient.get('https://s3.amazonaws.com/dream-team-booking/visa.csv')
   visa_data = CSV.parse(response)
@@ -35,4 +37,5 @@ def get_visa_requirements(country_name, target_country_id)
   requirements_options[visa_requirements + 1]
 end
 
-puts get_visa_requirements('Brazil', 'us')
+# usage example using Brazil-United States visa requirements
+# puts get_visa_requirements('Brazil', 'us')

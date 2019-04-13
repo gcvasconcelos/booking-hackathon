@@ -1,6 +1,7 @@
 require 'rest-client'
 require 'json'
 
+# returns an array of accessible hotels (with hotel info, photos and room info) in a city
 def get_accessible_hotels_by_city_id(city_id)
 	offset = 0
 	hotels_array = []
@@ -21,6 +22,7 @@ def get_accessible_hotels_by_city_id(city_id)
 	hotels_array[0]
 end
 
+# returns an array of top 3 cheapest accessible hotels (with hotel info, photos and room info) in a city
 def get_cheapest_hotels_by_city_id(city_id)
 	cheapest_hotels = []
 
@@ -40,4 +42,5 @@ def get_cheapest_hotels_by_city_id(city_id)
 	cheapest_hotels
 end
 
+# usage example using Amsterdam code
 # puts get_cheapest_hotels_by_city_id(-2140479)
