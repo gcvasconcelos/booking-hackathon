@@ -6,4 +6,12 @@ The functions make specific requests to be called inside the chatbot. The reques
 
 ## Usage
 
-To use the functions you must run 'bundle install' to install all ruby gems used in the requests. The parameters and return are all explained (and with examples) in commentaries in each function.
+To use these functions simply execute them. To make it available to the bot to see, we recommend uploading to a platform with a serveless service such as AWS or IBM. This code is within the framework required to run in (IBM Cloud Functions.)[https://cloud.ibm.com/openwhisk]
+
+### Weather
+
+Returns to the minimum and maximum temperature and number of rainy days of the month reported for that city. A valuable information for people with accessibility difficulties.
+
+Receives as parameters the id of the city and the month that the person intends to travel
+Return example:
+`{ 'low': -5, 'high': 10, 'rainy_days': 10 }`
