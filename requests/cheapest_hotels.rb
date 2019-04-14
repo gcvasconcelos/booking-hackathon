@@ -10,7 +10,7 @@ def get_accessible_hotels_by_city_id(city_id)
 	while hotels == 1000 do
 		url = "https://distribution-xml.booking.com/2.4/json/hotels?offset=#{offset}&rows=1000&city_ids=#{city_id}&hotel_facility_type_ids=25&extras=hotel_info,hotel_photos,room_info"
 
-		response = RestClient.get(url, headers={'Authorization': "Basic YW5hc2NpbWVudG9zb3V6YTZAZ21haWwuY29tOjYyMTc2MzIwcGVpeGFv"})
+		response = RestClient.get(url, headers={'Authorization': "Basic XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"})
 		
 		hotels_response = JSON.parse(response)
 		hotels = hotels_response["result"].length
