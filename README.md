@@ -16,12 +16,12 @@ Receives as parameters the city and the month that the person intends to travel
 
 Input example:
 ```
-{ city: "tokyo", month:"10"}
+{ 'city': 'tokyo', 'month': '10'}
 ```
 
 Return example:
 ```
-{ 'low': -5, 'high': 10, 'rainy_days': 10 }
+{ 'low': '-5', 'high': '10', 'rainy_days': '10' }
 ```
 
 ### Visa
@@ -32,5 +32,10 @@ Receives as parameters origin country name and destination country iso2 code
 
 Input example:
 ```
-{ country_name: "Brazil", target_country_id:"nl"}
+{ 'country_name': 'Brazil', 'target_country_id': 'nl'}
+```
+
+Return example:
+```
+{ 'visa': "A visa is required to your destination" }
 ```
