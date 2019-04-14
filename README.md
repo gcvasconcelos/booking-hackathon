@@ -39,3 +39,20 @@ Return example:
 ```
 { 'visa': "A visa is required to your destination" }
 ```
+### Best hotels
+
+Returns top 3 ranking accessible hotels by a given city
+
+Input example:
+```
+{ 'city': 'tokyo'}
+```
+
+Return example:
+```
+{:name=>"Tokyo inn Sakura An", :url=>"https://www.booking.com/hotel/jp/tokyo-inn-ying-an-dong-jing.html", :photo_url=>"https://q-xx.bstatic.com/xdata/images/hotel/max500/159821991.jpg?k=8b4d14c520ea58a0e2c7ef0b5721ca969413d4138789b2f67ae94ce49383163d&o=", :price=>21000.0, :currency=>"JPY"}
+
+{:name=>"Nestle Tokyo Deluxe Akihabara 04", :url=>"https://www.booking.com/hotel/jp/nestle-tokyo-deluxe-akihabara-04.html", :photo_url=>"https://q-xx.bstatic.com/xdata/images/hotel/max500/165337405.jpg?k=c80c841e3ee38e1b000cd1ee78250934e4f7195293fe747c540b68fca1783ab1&o=", :price=>27360.0, :currency=>"JPY"}
+
+{:name=>"ICI HOTEL Asakusabashi by RELIEF", :url=>"https://www.booking.com/hotel/jp/ici-asakusabashiekimae-by-relief.html", :photo_url=>"https://q-xx.bstatic.com/xdata/images/hotel/max500/181952592.jpg?k=942ef256975e19362c0b432c24eb76e5f1ab03a6c1927523bd14bd90e2f214e8&o=", :price=>7500.0, :currency=>"JPY"}
+```
