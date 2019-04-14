@@ -12,6 +12,25 @@ To use these functions simply execute them. To make it available to the bot to s
 
 Returns to the minimum and maximum temperature and number of rainy days of the month reported for that city. A valuable information for people with accessibility difficulties.
 
-Receives as parameters the id of the city and the month that the person intends to travel
+Receives as parameters the city and the month that the person intends to travel
+
+Input example:
+```
+{ city: "tokyo", month:"10"}
+```
+
 Return example:
-`{ 'low': -5, 'high': 10, 'rainy_days': 10 }`
+```
+{ 'low': -5, 'high': 10, 'rainy_days': 10 }
+```
+
+### Visa
+
+Returns an array with the visa requirements between two countries
+
+Receives as parameters origin country name and destination country iso2 code
+
+Input example:
+```
+{ country_name: "Brazil", target_country_id:"nl"}
+```
