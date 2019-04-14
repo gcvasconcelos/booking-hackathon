@@ -6,4 +6,4 @@ The functions make specific requests to be called inside the chatbot. The reques
 
 ## Usage
 
-To use the functions you must run 'bundle install' to install all ruby gems used in the requests. The parameters and return are all explained in commentaries in each function.
+To use the functions you must run 'bundle install' to install all ruby gems used in the requests. The parameters and return are all explained (and with examples) in commentaries in each function.
