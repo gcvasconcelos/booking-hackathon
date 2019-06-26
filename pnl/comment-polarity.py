@@ -68,9 +68,9 @@ def clean_review(review):
   review = re.sub(r'!{2,}', '!', review)
   return review
 
-def find_keywords(review):
+def find_cons_keywords(review):
   regexs = ([
-    re.compile("accessibility|accessible"),
+    re.compile("accessibility|not accessible|weren't accessible|isn't accessible|aren't accessible"),
     re.compile("narrow.*stairs|stairs.*narrow|steep.*stairs|stairs.*steep|reachable.*stairs|stairs.*reachable"),
     re.compile("\bwheelchair\b"),
   ]) 
@@ -88,20 +88,39 @@ def analize_user_review(user_reviews):
   cons_reviews = []
   for review in cons:
     review = clean_review(review)
-    if find_keywords(review): cons_reviews.append(review)
+    if find_cons_keywords(review): cons_reviews.append(review)
+      
   return cons_reviews
 
-    
-arr = []
-hotels_ids = get_accessible_hotels_by_city_id('-2140479')
-for hotel_id in hotels_ids:
-  reviews_array = get_user_reviews_by_city_id(hotel_id)
-  res = analize_user_review(reviews_array)
-  print(hotel_id)
-  if res:
-    import pdb; pdb.set_trace()
-    arr.append(res)
+def npl_accessibility_analysis(hotel_id):
+  negative_reviews = []
 
-# reviews_array = get_user_reviews_by_city_id('10024')
-# res = analize_user_review(reviews_array)
+  reviews_array = get_user_reviews_by_city_id(hotel_id)
+  analysis_result = analize_user_review(reviews_array)
+
+  if analysis_result:
+    negative_reviews.append(analysis_result)
+  
+  return negative_reviews
+
+def test_hotels_from_city(city_id):
+  hotel_ids = get_accessible_hotels_by_city_id(city_id)
+  negative_reviews = []
+  total = 0
+
+  for hotel_id in hotel_ids:
+    reviews_array = get_user_reviews_by_city_id(hotel_id)
+    analysis_result = analize_user_review(reviews_array)
+    if analysis_result:
+      print(analysis_result)
+      negative_reviews.append(len(analysis_result))
+    total +=1
+    print(total)
+  print((1 - len(negative_reviews)/total)*100.0)
+  return negative_reviews
+
+# res = test_hotels_from_city('-2140479')
+# import pdb; pdb.set_trace()
+
+# res = npl_accessibility_analysis('10491')
 # import pdb; pdb.set_trace()
