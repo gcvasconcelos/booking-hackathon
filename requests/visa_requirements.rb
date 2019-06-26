@@ -38,4 +38,4 @@ def get_visa_requirements(country_name, target_country_id)
 end
 
 # usage example using Brazil-United States visa requirements
-# puts get_visa_requirements('Brazil', 'us')
+puts get_visa_requirements('Spain', 'jp')
