@@ -21,11 +21,11 @@ MOBILITY = {
     "room_facilities" : "upper_floors_accessible_by_lift,toilet_with_grab_rails,walk_in_shower,emergency_cord_in_bathroom,accessible_by_lift"
   },
   "stand_up" : {
-    "hotel_facilities" : "facilities_for_disabled,wheelchair_accessible,lower_bathroom_sink",
+    "hotel_facilities" : "facilities_for_disabled,wheelchair_accessible",
     "room_facilities" : "upper_floors_accessible_by_lift,entire_unit_wheelchair_accessible,toilet_with_grab_rails,adapted_bath,walk_in_shower,lowered_sink,emergency_cord_in_bathroom,shower_chair,accessible_by_lift"
   },
   "wheelchair" : {
-    "hotel_facilities" : "facilities_for_disabled,wheelchair_accessible,higher_level_toilet,lower_bathroom_sink",
+    "hotel_facilities" : "facilities_for_disabled,wheelchair_accessible",
     "room_facilities" : "upper_floors_accessible_by_lift,entire_unit_wheelchair_accessible,toilet_with_grab_rails,adapted_bath,roll_in_shower,raised_toilet,lowered_sink,emergency_cord_in_bathroom,shower_chair,accessible_by_lift"
   }
 }
@@ -110,5 +110,5 @@ def get_accessible_hotels_by_city_id(city_id, check_in, check_out, mobility):
     hotels_length = len(hotels_response)
   return hotels
 
-res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26', 'mobility': 'walk'})
+res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26', 'mobility': 'wheelchair'})
 import pdb; pdb.set_trace()
