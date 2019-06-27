@@ -22,25 +22,23 @@ def main(param):
     i+=1
   return clean_hotels
 
-# def static_review_analysis(hotel_id):
-#   import json
-#   with open('reviews.json') as json_file:  
-#     static_reviews = json.load(json_file)
-#   for review in static_reviews:
-  
-#   return static_reviews
+def static_review_analysis(hotel_id):
+  with open('reviews.json') as json_file:  
+    static_reviews = json.load(json_file)
+  hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == hotel_id]  
+  return hotel_review[0]
 
 def get_best_hotels_by_city_id(city_id):
   hotels = get_accessible_hotels_by_city_id(city_id)
   top_n_hotels = []
-  for hotel in hotels:
+  for hotel in hotels[:]:
     print(hotel["hotel_id"])
     print(hotel["room_data"][0]["room_info"]["min_price"])
     if hotel["room_data"][0]["room_info"]["min_price"] == 0:
       print('Was removed.')
       hotels.remove(hotel)
       continue
-    hotel['accessibility_review'] = npl_accessibility_analysis(hotel['hotel_id'])
+    hotel['accessibility_review'] = static_review_analysis(hotel['hotel_id'])
     print(hotel['accessibility_review'])
     if hotel['accessibility_review']['positive_reviews'] == []:
       print('Was removed.')

@@ -41,7 +41,6 @@ def get_user_reviews_by_hotel_id(hotel_id):
     api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + hotel_id 
     
     reviews_response = session.get(api_url).json()
-    import pdb; pdb.set_trace()
     if reviews_response:
       reviews_response = reviews_response['result']
     else:
@@ -146,11 +145,19 @@ def test_hotels_from_city(city_id):
   with open('reviews.json', 'w') as outfile:  
     json.dump(analysis, outfile)
 
-test_hotels_from_city('-2140479')
+def static_review_analysis(hotel_id):
+  with open('reviews.json') as json_file:  
+    static_reviews = json.load(json_file)
+  hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == hotel_id]  
+  return hotel_review[0]
+
+# res = static_review_analysis('10098')
+
+test_hotels_from_city('-1746443')
+import pdb; pdb.set_trace()
+
+# res = npl_accessibility_analysis('11318')
 # import pdb; pdb.set_trace()
 
-# res = npl_accessibility_analysis('3664307')
-# import pdb; pdb.set_trace()
-
-# res = get_user_reviews_by_hotel_id('10098')
+# res = get_user_reviews_by_hotel_id('11318')
 # import pdb; pdb.set_trace()
