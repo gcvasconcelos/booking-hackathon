@@ -1,0 +1,33 @@
+<html lang="en"><head>
+    <title>Preview Link</title>
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans+Condensed|IBM+Plex+Sans:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="assets/style/base.css">
+    <link rel="stylesheet" href="assets/style/theme.css">
+    <link rel="stylesheet" href="assets/style/chat.css">
+    <link rel="stylesheet" href="assets/style/normalize.css">
+    <link rel="stylesheet" href="assets/style/blue.css">
+  </head>
+  <body>
+    <iframe class="iframe" src="https://www.booking.com/accessible-traveling/index.en-gb.html?aid=397594;label=gog235jc-1DCAEY9gcoggI46AdIM1gDaKkBiAEBmAEJuAEYyAEM2AED6AEBiAIBqAIEuAL6l9LoBcACAQ;sid=0ecdb7824af0a76f9256914babf2971e;keep_landing=1&sb_price_type=total&" height="100%" width="100%"></iframe>
+    <div class="bot-buttom">
+      <div class="buttom-icon">
+        <div class="icon"></div>
+      </div>
+      <div class="close"></div>
+      <div class="chatbot-container Chat__body WatsonChatContainer"></div>
+    </div>
+    <script src="https://assistant-chat-us-south.watsonplatform.net/web/chat/ibm.chat.0.0.4.js"></script>
+    <script>
+      const config = {
+        bot_image: 'https://media-assets-02.thedrum.com/cache/images/thedrum-prod/public-news-tmp-85019-booking--default--300.png',
+        bot_name: 'Blue - Accessible Tourism',
+        debug: true,
+        element: document.querySelector('.chatbot-container'),
+        integration_id: '4836f8f2-7760-4dcd-8c69-678984f37e13',
+        post_url: 'https://assistant-chat-us-south.watsonplatform.net/public/message/'
+      };
+    </script>
+    <script src="assets/scripts/index.js"></script>
+  </body>
+</html>

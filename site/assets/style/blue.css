@@ -1,0 +1,78 @@
+.chatbot-container {
+  background-color: white;
+  box-shadow: 5px 5px 5px #A5A5A5;
+}
+
+.bot-buttom {
+  max-height: 100px;
+  max-width: 100px;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: 0s;
+  border: 2px solid white;
+  box-shadow: 5px 5px 5px #444444;
+}
+
+.buttom-icon {
+  z-index: 2;
+  background-color: #003580;
+  height: 100%;
+  width: 100%;
+  opacity: 1;
+}
+
+.bot-buttom.-active {
+  max-height: 600px;
+  max-width: 360px;
+  border-radius: 8px;
+  background: transparent;
+  transition: 0.5s;
+}
+
+.bot-buttom.-active .buttom-icon {
+  display: none;
+  opacity: 0;
+}
+
+.bot-buttom .close {
+  display: none;
+}
+
+.bot-buttom.-active .close {
+  display: block;
+}
+  
+.buttom-icon {
+  background-image: url('../images/accessibility-icon.svg');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 100px;
+  width: 100px;
+}
+
+.close {
+  background-image: url('../images/close-icon.svg');
+  height: 24px;
+  width: 24px;
+  background-size: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: absolute;
+  z-index: 5;
+  top: 8px;
+  right: 8px;
+}
+
+.WatsonChat__header-shape {
+  display: none;
+}
+
+.WatsonChat__header-name--holder {
+  background-color: #003580;
+}
