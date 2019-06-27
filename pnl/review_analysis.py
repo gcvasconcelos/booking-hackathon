@@ -1,3 +1,4 @@
+import json
 import requests
 import re
 
@@ -39,7 +40,13 @@ def get_user_reviews_by_hotel_id(hotel_id):
   while results_length == 100:
     api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + hotel_id 
     
-    reviews_response = session.get(api_url).json()['result']
+    reviews_response = session.get(api_url).json()
+    import pdb; pdb.set_trace()
+    if reviews_response:
+      reviews_response = reviews_response['result']
+    else:
+      offset += 100
+      continue
     for review in reviews_response:
       if review['pros']:
         user_reviews['pros'].append(review['pros'])
@@ -52,8 +59,6 @@ def get_user_reviews_by_hotel_id(hotel_id):
 def clean_review(review):
   # remove new lines and extra spaces
   review = re.sub(r'\n', ' ', review.strip())
-  # detect and remove emojis 
-  review = emoji.get_emoji_regexp().sub(u'', review)
   # convert ponctuation
   review = re.sub(r'&#39;', "'", review)
   review = re.sub(r'&#47;', "'", review)
@@ -126,28 +131,26 @@ def npl_accessibility_analysis(hotel_id):
 
 def test_hotels_from_city(city_id):
   hotel_ids = get_accessible_hotels_by_city_id(city_id)
-  negative_reviews = []
-  positive_reviews = []
+
+  analysis = []
   total = 0
-
   for hotel_id in hotel_ids:
+    hotel = {}
+    hotel["hotel_id"] = hotel_id
     reviews_array = get_user_reviews_by_hotel_id(hotel_id)
-    analysis_result = analize_user_review(reviews_array)
-    if analysis_result['cons']:
-      negative_reviews.append(analysis_result['cons'])
-    if analysis_result['pros']:
-      positive_reviews.append(analysis_result['pros'])
-    total +=1
-  return ({
-    'negative_reviews': negative_reviews, 
-    'positive_reviews': positive_reviews
-  })
+    hotel["review"] = analize_user_review(reviews_array)
+    analysis.append(hotel)
+    total += 1
+    print(total)
 
-# res = test_hotels_from_city('-2140479')
+  with open('reviews.json', 'w') as outfile:  
+    json.dump(analysis, outfile)
+
+test_hotels_from_city('-2140479')
 # import pdb; pdb.set_trace()
 
-res = npl_accessibility_analysis('3664307')
-import pdb; pdb.set_trace()
+# res = npl_accessibility_analysis('3664307')
+# import pdb; pdb.set_trace()
 
 # res = get_user_reviews_by_hotel_id('10098')
 # import pdb; pdb.set_trace()

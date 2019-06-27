@@ -18,24 +18,47 @@ def main(param):
   clean_hotels = {}
   i = 0
   for hotel in hotels[:3]:
-    hotel['accessibility_review'] = npl_accessibility_analysis(hotel['hotel_id'])
     clean_hotels[POSITIONS[i]] = hotel
     i+=1
   return clean_hotels
+
+# def static_review_analysis(hotel_id):
+#   import json
+#   with open('reviews.json') as json_file:  
+#     static_reviews = json.load(json_file)
+#   for review in static_reviews:
+  
+#   return static_reviews
 
 def get_best_hotels_by_city_id(city_id):
   hotels = get_accessible_hotels_by_city_id(city_id)
   top_n_hotels = []
   for hotel in hotels:
-    if not hotel["room_data"][0]["room_info"]["min_price"]:
+    print(hotel["hotel_id"])
+    print(hotel["room_data"][0]["room_info"]["min_price"])
+    if hotel["room_data"][0]["room_info"]["min_price"] == 0:
+      print('Was removed.')
       hotels.remove(hotel)
-    elif hotel["hotel_data"]["review_score"]:
+      continue
+    hotel['accessibility_review'] = npl_accessibility_analysis(hotel['hotel_id'])
+    print(hotel['accessibility_review'])
+    if hotel['accessibility_review']['positive_reviews'] == []:
+      print('Was removed.')
       hotels.remove(hotel)
+  
+  count = 0
+  for hotel in hotels:
+    import pdb; pdb.set_trace()
+    print(hotel["room_data"][0]["room_info"]["min_price"])
+    if hotel["accessibility_review"]["positive_reviews"] == []:
+      count += 1
+
   for i in range(3):
-    top_hotel = max(hotels, key=lambda hotel:hotel["hotel_data"]["review_score"])
+    top_hotel = max(hotels, key=lambda hotel:len(hotel["accessibility_review"]["positive_reviews"]))
     top_n_hotels.append(top_hotel)
     hotels.remove(top_hotel)
 
+  import pdb; pdb.set_trace()
   top_hotels = []
   for hotel in top_n_hotels:
     top_hotels.append({ 
@@ -47,6 +70,7 @@ def get_best_hotels_by_city_id(city_id):
     'currency': hotel["hotel_data"]['currency'],
     'score': hotel["hotel_data"]["review_score"]
   })
+  import pdb; pdb.set_trace()
   return top_hotels
 
 def get_accessible_hotels_by_city_id(city_id):
@@ -85,8 +109,10 @@ def get_user_reviews_by_hotel_id(hotel_id):
 
   while results_length == 100:
     api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + str(hotel_id) 
-    
-    reviews_response = session.get(api_url).json()['result']
+    if len(session.get(api_url).json()) != 0:
+      reviews_response = session.get(api_url).json()['result']
+    else:
+      continue
     for review in reviews_response:
       if review['pros']:
         user_reviews['pros'].append(review['pros'])
