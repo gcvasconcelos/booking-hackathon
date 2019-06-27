@@ -15,13 +15,13 @@ POSITIONS = [
 ]
 
 def main(param):
-  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']])
-  clean_hotels = {}
-  i = 0
-  for hotel in hotels[:3]:
-    clean_hotels[POSITIONS[i]] = hotel
-    i+=1
-  return clean_hotels
+  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']])   
+  return {
+    'first': hotels[0], 
+    'second': hotels[1], 
+    'third': hotels[2] 
+  }
+
 
 def static_review_analysis(hotel_id, city_id):
   json_name = '../src/' + list(CITY_IDS.keys())[list(CITY_IDS.values()).index(city_id)] + '_reviews.json'
@@ -33,7 +33,6 @@ def static_review_analysis(hotel_id, city_id):
       'positive_reviews': hotel_review[0]['pros'],
       'negative_reviews': hotel_review[0]['cons']
     }
-
 
 def get_best_hotels_by_city_id(city_id):
   hotels = get_accessible_hotels_by_city_id(city_id)
@@ -51,10 +50,17 @@ def get_best_hotels_by_city_id(city_id):
     top_n_hotels.append(top_hotel)
     hotels.remove(top_hotel)
 
+
+
   top_hotels = []
   for hotel in top_n_hotels:
+    if len(hotel["accessibility_review"]['positive_reviews']) > len(hotel["accessibility_review"]['negative_reviews']):
+      hotel_review = 'We found some positive reviews of this hotel. Here is a great one:\n "' + hotel["accessibility_review"]['positive_reviews'][0] + '"'
+    else:
+      hotel_review = ""
+
     top_hotels.append({ 
-    'accessibility_review': hotel["accessibility_review"], 
+    'accessibility_review': hotel_review, 
     'name': hotel["hotel_data"]['name'], 
     'hotel_id': hotel['hotel_id'], 
     'url': hotel["hotel_data"]['url'], 
@@ -87,124 +93,6 @@ def get_accessible_hotels_by_city_id(city_id):
     hotels_length = len(hotels_response)
 
   return hotels
-
-def get_user_reviews_by_hotel_id(hotel_id):
-  session = requests.Session()
-  session.auth = ('wladimirgramacho', 'nO#1A128ne55U^^Da6')
-
-  offset = 0
-  results_length = 100
-  user_reviews = {
-    'pros': [],
-    'cons': []
-  }
-
-  while results_length == 100:
-    api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + str(hotel_id) 
-    if len(session.get(api_url).json()) != 0:
-      reviews_response = session.get(api_url).json()['result']
-    else:
-      continue
-    for review in reviews_response:
-      if review['pros']:
-        user_reviews['pros'].append(review['pros'])
-      if review['cons']:
-        user_reviews['cons'].append(review['cons'])
-    results_length = len(reviews_response)
-    offset += 100
-  return user_reviews
-
-def clean_review(review):
-  # remove new lines and extra spaces
-  review = re.sub(r'\n', ' ', review.strip())
-  # convert ponctuation
-  review = re.sub(r'&#39;', "'", review)
-  review = re.sub(r'&#47;', "'", review)
-  review = re.sub(r'&quot;', '"', review)
-  return review
-
-def find_cons_keywords(review):
-  regexs = ([
-    re.compile("accessibility|not accessible|weren't accessible|isn't accessible|aren't accessible"),
-    # re.compile("narrow.*stairs|stairs.*narrow|steep.*stairs|stairs.*steep|reachable.*stairs|stairs.*reachable"),
-    re.compile("\bwheelchair\b")
-  ]) 
-  has_keyword = False
-  for r in regexs:
-    found_expression = re.search(r, review.lower())
-    # check if any of the keywords were found
-    if found_expression:
-      has_keyword = True
-
-  return has_keyword
-
-def find_pros_keywords(review):
-  regexs = ([
-    re.compile("disabled"),
-    re.compile("\bwheelchair\b")
-  ]) 
-  has_keyword = False
-  for r in regexs:
-    found_expression = re.search(r, review.lower())
-    # check if any of the keywords were found
-    if found_expression:
-      has_keyword = True
-
-  return has_keyword
-
-def analize_user_review(user_reviews):
-  cons = user_reviews['cons']
-  cons_reviews = []
-  for review in cons:
-    review = clean_review(review)
-    if find_cons_keywords(review): cons_reviews.append(review)
-  
-  pros = user_reviews['pros']
-  pros_reviews = []
-  for review in pros:
-    review = clean_review(review)
-    if find_pros_keywords(review): pros_reviews.append(review)
-      
-  return ({
-    'cons': cons_reviews, 
-    'pros': pros_reviews
-  })
-
-def npl_accessibility_analysis(hotel_id):
-  negative_reviews = []
-  positive_reviews = []
-
-  reviews_array = get_user_reviews_by_hotel_id(hotel_id)
-  analysis_result = analize_user_review(reviews_array)
-
-  if analysis_result['cons']:
-    negative_reviews.append(analysis_result['cons'])
-  if analysis_result['pros']:
-    positive_reviews.append(analysis_result['pros'])
-  
-  return ({
-    'negative_reviews': negative_reviews, 
-    'positive_reviews': positive_reviews
-  })
-
-def test_hotels_from_city(city_id):
-  hotel_ids = get_accessible_hotels_by_city_id(city_id)
-  negative_reviews = []
-  positive_reviews = []
-  total = 0
-
-  for hotel_id in hotel_ids:
-    reviews_array = get_user_reviews_by_hotel_id(hotel_id)
-    analysis_result = analize_user_review(reviews_array)
-    if analysis_result['cons']:
-      negative_reviews.append(analysis_result['cons'])
-    if analysis_result['pros']:
-      positive_reviews.append(analysis_result['pros'])
-    total +=1
-  return ({
-    'negative_reviews': negative_reviews, 
-    'positive_reviews': positive_reviews
-  })
 
 res = main({'city': 'amsterdam'})
 import pdb; pdb.set_trace()
