@@ -1,6 +1,54 @@
 import requests
 import re
 
+CITY_IDS = {
+    'amsterdam': "-2140479",
+    'tokyo': "-246227",
+    'berlin': "-1746443"
+}
+
+POSITIONS = [
+    'first',
+    'second',
+    'third'
+]
+
+def main(param):
+  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']])
+  clean_hotels = {}
+  i = 0
+  for hotel in hotels[:3]:
+    hotel['accessibility_review'] = npl_accessibility_analysis(hotel['hotel_id'])
+    clean_hotels[POSITIONS[i]] = hotel
+    i+=1
+  return clean_hotels
+
+def get_best_hotels_by_city_id(city_id):
+  hotels = get_accessible_hotels_by_city_id(city_id)
+  top_n_hotels = []
+  for hotel in hotels:
+    if not hotel["room_data"][0]["room_info"]["min_price"]:
+      hotels.remove(hotel)
+    elif hotel["hotel_data"]["review_score"]:
+      hotels.remove(hotel)
+  for i in range(3):
+    top_hotel = max(hotels, key=lambda hotel:hotel["hotel_data"]["review_score"])
+    top_n_hotels.append(top_hotel)
+    hotels.remove(top_hotel)
+
+  top_hotels = []
+  for hotel in top_n_hotels:
+    top_hotels.append({ 
+    'name': hotel["hotel_data"]['name'], 
+    'hotel_id': hotel['hotel_id'], 
+    'url': hotel["hotel_data"]['url'], 
+    'image': hotel["hotel_data"]["hotel_photos"][0]["url_original"],
+    'price': hotel["room_data"][0]["room_info"]["min_price"],
+    'currency': hotel["hotel_data"]['currency'],
+    'score': hotel["hotel_data"]["review_score"]
+  })
+  return top_hotels
+
 def get_accessible_hotels_by_city_id(city_id):
   # API credentials
   session = requests.Session()
@@ -9,21 +57,20 @@ def get_accessible_hotels_by_city_id(city_id):
   # initialize loop parameters to iterate to all hotels of a city
   offset = 0
   hotels_length = 1000 
-  hotels_ids = []
+  hotels = []
 
   # calls API x times, where x is the total number of pages existent
   while hotels_length == 1000:
-
-    api_url = "https://distribution-xml.booking.com/2.4/json/hotels?offset="+str(offset)+"&rows=1000&city_ids=" + city_id + "&hotel_facility_type_ids=25"
+    api_url = "https://distribution-xml.booking.com/2.4/json/hotels?offset="+str(offset)+"&rows=1000&city_ids=" + city_id + "&hotel_facility_type_ids=25&extras=hotel_info,hotel_photos,room_info"
 
     hotels_response = session.get(api_url).json()['result']
     for hotel in hotels_response:
-      hotels_ids.append(str(hotel['hotel_id']))
+      hotels.append(hotel)
 
     offset += 1000
     hotels_length = len(hotels_response)
 
-  return hotels_ids
+  return hotels
 
 def get_user_reviews_by_hotel_id(hotel_id):
   session = requests.Session()
@@ -37,7 +84,7 @@ def get_user_reviews_by_hotel_id(hotel_id):
   }
 
   while results_length == 100:
-    api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + hotel_id 
+    api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + str(hotel_id) 
     
     reviews_response = session.get(api_url).json()['result']
     for review in reviews_response:
@@ -52,8 +99,6 @@ def get_user_reviews_by_hotel_id(hotel_id):
 def clean_review(review):
   # remove new lines and extra spaces
   review = re.sub(r'\n', ' ', review.strip())
-  # detect and remove emojis 
-  review = emoji.get_emoji_regexp().sub(u'', review)
   # convert ponctuation
   review = re.sub(r'&#39;', "'", review)
   review = re.sub(r'&#47;', "'", review)
@@ -143,11 +188,5 @@ def test_hotels_from_city(city_id):
     'positive_reviews': positive_reviews
   })
 
-# res = test_hotels_from_city('-2140479')
-# import pdb; pdb.set_trace()
-
-res = npl_accessibility_analysis('3664307')
+res = main({'city': 'amsterdam'})
 import pdb; pdb.set_trace()
-
-# res = get_user_reviews_by_hotel_id('10098')
-# import pdb; pdb.set_trace()
