@@ -15,7 +15,7 @@ POSITIONS = [
 ]
 
 def main(param):
-  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']])   
+  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']], param['check_in'], param['check_out'])   
   return {
     'first': hotels[0], 
     'second': hotels[1], 
@@ -23,10 +23,7 @@ def main(param):
   }
 
 
-def static_review_analysis(hotel_id, city_id):
-  json_name = '../src/' + list(CITY_IDS.keys())[list(CITY_IDS.values()).index(city_id)] + '_reviews.json'
-  with open(json_name) as json_file:  
-    static_reviews = json.load(json_file)
+def static_review_analysis(hotel_id, static_reviews):
   hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == str(hotel_id)]  
   if hotel_review:
     return {
@@ -34,14 +31,16 @@ def static_review_analysis(hotel_id, city_id):
       'negative_reviews': hotel_review[0]['cons']
     }
 
-def get_best_hotels_by_city_id(city_id):
-  hotels = get_accessible_hotels_by_city_id(city_id)
+def get_best_hotels_by_city_id(city_id, check_in, check_out):
+  hotels = get_accessible_hotels_by_city_id(city_id, check_in, check_out)
   top_n_hotels = []
+
+  json_name = "https://dream-team-booking.s3.amazonaws.com/" + list(CITY_IDS.keys())[list(CITY_IDS.values()).index(city_id)] + "_reviews.json"
+  session = requests.Session()
+  static_reviews = session.get(json_name).json()
+
   for hotel in hotels[:]:
-    if hotel["room_data"][0]["room_info"]["min_price"] == 0:
-      hotels.remove(hotel)
-      continue
-    hotel['accessibility_review'] = static_review_analysis(hotel['hotel_id'], city_id)
+    hotel['accessibility_review'] = static_review_analysis(hotel['hotel_id'], static_reviews)
     if hotel['accessibility_review']['positive_reviews'] == []:
       hotels.remove(hotel)
 
@@ -49,8 +48,6 @@ def get_best_hotels_by_city_id(city_id):
     top_hotel = max(hotels, key=lambda hotel:len(hotel["accessibility_review"]["positive_reviews"]))
     top_n_hotels.append(top_hotel)
     hotels.remove(top_hotel)
-
-
 
   top_hotels = []
   for hotel in top_n_hotels:
@@ -61,17 +58,17 @@ def get_best_hotels_by_city_id(city_id):
 
     top_hotels.append({ 
     'accessibility_review': hotel_review, 
-    'name': hotel["hotel_data"]['name'], 
+    'name': hotel["hotel_name"], 
     'hotel_id': hotel['hotel_id'], 
-    'url': hotel["hotel_data"]['url'], 
-    'image': hotel["hotel_data"]["hotel_photos"][0]["url_original"],
-    'price': hotel["room_data"][0]["room_info"]["min_price"],
-    'currency': hotel["hotel_data"]['currency'],
-    'score': hotel["hotel_data"]["review_score"]
+    'url': '', 
+    'image': '',
+    'price': hotel['price'],
+    'currency': hotel["hotel_currency_code"],
+    'score': hotel["review_score"]
   })
   return top_hotels
 
-def get_accessible_hotels_by_city_id(city_id):
+def get_accessible_hotels_by_city_id(city_id, check_in, check_out):
   # API credentials
   session = requests.Session()
   session.auth = ('wladimirgramacho', 'nO#1A128ne55U^^Da6')
@@ -83,7 +80,7 @@ def get_accessible_hotels_by_city_id(city_id):
 
   # calls API x times, where x is the total number of pages existent
   while hotels_length == 1000:
-    api_url = "https://distribution-xml.booking.com/2.4/json/hotels?offset="+str(offset)+"&rows=1000&city_ids=" + city_id + "&hotel_facility_type_ids=25&extras=hotel_info,hotel_photos,room_info"
+    api_url = "https://distribution-xml.booking.com/2.4/json/hotelAvailability?offset=" + str(offset) + "&rows=1000&checkin=" + str(check_in) + "&checkout="+ str(check_out) + "&city_ids=" + str(city_id) + "&hotel_facilities=" + "facilities_for_disabled" + "&room1=A,A&extras=hotel_details"
 
     hotels_response = session.get(api_url).json()['result']
     for hotel in hotels_response:
@@ -91,8 +88,7 @@ def get_accessible_hotels_by_city_id(city_id):
 
     offset += 1000
     hotels_length = len(hotels_response)
-
   return hotels
 
-res = main({'city': 'amsterdam'})
+res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26'})
 import pdb; pdb.set_trace()

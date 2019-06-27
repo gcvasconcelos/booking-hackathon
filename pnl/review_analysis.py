@@ -67,7 +67,6 @@ def clean_review(review):
 def find_cons_keywords(review):
   regexs = ([
     re.compile("accessibility|not accessible|weren't accessible|isn't accessible|aren't accessible"),
-    re.compile("narrow.*stairs|stairs.*narrow|steep.*stairs|stairs.*steep|reachable.*stairs|stairs.*reachable"),
     re.compile("\bwheelchair\b")
   ]) 
   has_keyword = False
@@ -153,8 +152,8 @@ def static_review_analysis(hotel_id):
 
 # res = static_review_analysis('10098')
 
-test_hotels_from_city('-1746443')
-import pdb; pdb.set_trace()
+test_hotels_from_city('-2140479')
+# import pdb; pdb.set_trace()
 
 # res = npl_accessibility_analysis('11318')
 # import pdb; pdb.set_trace()
