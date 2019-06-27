@@ -50,18 +50,22 @@ def get_best_hotels_by_city_id(city_id, check_in, check_out):
     hotels.remove(top_hotel)
 
   top_hotels = []
+  session.auth = ('wladimirgramacho', 'nO#1A128ne55U^^Da6')
   for hotel in top_n_hotels:
     if len(hotel["accessibility_review"]['positive_reviews']) > len(hotel["accessibility_review"]['negative_reviews']):
       hotel_review = 'We found some positive reviews of this hotel. Here is a great one:\n "' + hotel["accessibility_review"]['positive_reviews'][0] + '"'
     else:
       hotel_review = ""
 
+    api_url = "https://distribution-xml.booking.com/2.4/json/hotels?hotel_ids=" + str(hotel['hotel_id']) + "&extras=hotel_photos,hotel_info"
+    hotel_info = session.get(api_url).json()['result'][0]
+
     top_hotels.append({ 
     'accessibility_review': hotel_review, 
     'name': hotel["hotel_name"], 
     'hotel_id': hotel['hotel_id'], 
-    'url': '', 
-    'image': '',
+    'url': hotel_info['hotel_data']['url'], 
+    'image': hotel_info["hotel_data"]["hotel_photos"][0]["url_original"],
     'price': hotel['price'],
     'currency': hotel["hotel_currency_code"],
     'score': hotel["review_score"]
