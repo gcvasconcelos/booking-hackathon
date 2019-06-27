@@ -21,11 +21,11 @@ MOBILITY = {
     "room_facilities" : "upper_floors_accessible_by_lift,toilet_with_grab_rails,walk_in_shower,emergency_cord_in_bathroom,accessible_by_lift"
   },
   "stand_up" : {
-    "hotel_facilities" : "facilities_for_disabled,wheelchair_accessible",
+    "hotel_facilities" : "facilities_for_disabled",
     "room_facilities" : "upper_floors_accessible_by_lift,entire_unit_wheelchair_accessible,toilet_with_grab_rails,adapted_bath,walk_in_shower,lowered_sink,emergency_cord_in_bathroom,shower_chair,accessible_by_lift"
   },
   "wheelchair" : {
-    "hotel_facilities" : "facilities_for_disabled,wheelchair_accessible",
+    "hotel_facilities" : "facilities_for_disabled",
     "room_facilities" : "upper_floors_accessible_by_lift,entire_unit_wheelchair_accessible,toilet_with_grab_rails,adapted_bath,roll_in_shower,raised_toilet,lowered_sink,emergency_cord_in_bathroom,shower_chair,accessible_by_lift"
   }
 }
