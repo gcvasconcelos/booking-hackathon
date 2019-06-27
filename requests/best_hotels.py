@@ -54,6 +54,7 @@ def get_best_hotels_by_city_id(city_id):
   top_hotels = []
   for hotel in top_n_hotels:
     top_hotels.append({ 
+    'accessibility_review': hotel["accessibility_review"], 
     'name': hotel["hotel_data"]['name'], 
     'hotel_id': hotel['hotel_id'], 
     'url': hotel["hotel_data"]['url'], 
