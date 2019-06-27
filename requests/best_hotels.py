@@ -1,5 +1,6 @@
 import requests
 import re
+import json
 
 CITY_IDS = {
     'amsterdam': "-2140479",
@@ -22,41 +23,34 @@ def main(param):
     i+=1
   return clean_hotels
 
-def static_review_analysis(hotel_id):
-  with open('reviews.json') as json_file:  
+def static_review_analysis(hotel_id, city_id):
+  json_name = '../src/' + list(CITY_IDS.keys())[list(CITY_IDS.values()).index(city_id)] + '_reviews.json'
+  with open(json_name) as json_file:  
     static_reviews = json.load(json_file)
-  hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == hotel_id]  
-  return hotel_review[0]
+  hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == str(hotel_id)]  
+  if hotel_review:
+    return {
+      'positive_reviews': hotel_review[0]['pros'],
+      'negative_reviews': hotel_review[0]['cons']
+    }
+
 
 def get_best_hotels_by_city_id(city_id):
   hotels = get_accessible_hotels_by_city_id(city_id)
   top_n_hotels = []
   for hotel in hotels[:]:
-    print(hotel["hotel_id"])
-    print(hotel["room_data"][0]["room_info"]["min_price"])
     if hotel["room_data"][0]["room_info"]["min_price"] == 0:
-      print('Was removed.')
       hotels.remove(hotel)
       continue
-    hotel['accessibility_review'] = static_review_analysis(hotel['hotel_id'])
-    print(hotel['accessibility_review'])
+    hotel['accessibility_review'] = static_review_analysis(hotel['hotel_id'], city_id)
     if hotel['accessibility_review']['positive_reviews'] == []:
-      print('Was removed.')
       hotels.remove(hotel)
-  
-  count = 0
-  for hotel in hotels:
-    import pdb; pdb.set_trace()
-    print(hotel["room_data"][0]["room_info"]["min_price"])
-    if hotel["accessibility_review"]["positive_reviews"] == []:
-      count += 1
 
   for i in range(3):
     top_hotel = max(hotels, key=lambda hotel:len(hotel["accessibility_review"]["positive_reviews"]))
     top_n_hotels.append(top_hotel)
     hotels.remove(top_hotel)
 
-  import pdb; pdb.set_trace()
   top_hotels = []
   for hotel in top_n_hotels:
     top_hotels.append({ 
@@ -68,7 +62,6 @@ def get_best_hotels_by_city_id(city_id):
     'currency': hotel["hotel_data"]['currency'],
     'score': hotel["hotel_data"]["review_score"]
   })
-  import pdb; pdb.set_trace()
   return top_hotels
 
 def get_accessible_hotels_by_city_id(city_id):
@@ -132,7 +125,7 @@ def clean_review(review):
 def find_cons_keywords(review):
   regexs = ([
     re.compile("accessibility|not accessible|weren't accessible|isn't accessible|aren't accessible"),
-    re.compile("narrow.*stairs|stairs.*narrow|steep.*stairs|stairs.*steep|reachable.*stairs|stairs.*reachable"),
+    # re.compile("narrow.*stairs|stairs.*narrow|steep.*stairs|stairs.*steep|reachable.*stairs|stairs.*reachable"),
     re.compile("\bwheelchair\b")
   ]) 
   has_keyword = False
