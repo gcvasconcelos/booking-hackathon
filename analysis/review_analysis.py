@@ -1,54 +1,10 @@
+# All functions used to improve the performance of the best_hotels cloud function.
+
+import json
 import requests
 import re
 
-CITY_IDS = {
-    'amsterdam': "-2140479",
-    'tokyo': "-246227",
-    'berlin': "-1746443"
-}
-
-POSITIONS = [
-    'first',
-    'second',
-    'third'
-]
-
-def main(param):
-  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']])
-  clean_hotels = {}
-  i = 0
-  for hotel in hotels[:3]:
-    hotel['accessibility_review'] = npl_accessibility_analysis(hotel['hotel_id'])
-    clean_hotels[POSITIONS[i]] = hotel
-    i+=1
-  return clean_hotels
-
-def get_best_hotels_by_city_id(city_id):
-  hotels = get_accessible_hotels_by_city_id(city_id)
-  top_n_hotels = []
-  for hotel in hotels:
-    if not hotel["room_data"][0]["room_info"]["min_price"]:
-      hotels.remove(hotel)
-    elif hotel["hotel_data"]["review_score"]:
-      hotels.remove(hotel)
-  for i in range(3):
-    top_hotel = max(hotels, key=lambda hotel:hotel["hotel_data"]["review_score"])
-    top_n_hotels.append(top_hotel)
-    hotels.remove(top_hotel)
-
-  top_hotels = []
-  for hotel in top_n_hotels:
-    top_hotels.append({ 
-    'name': hotel["hotel_data"]['name'], 
-    'hotel_id': hotel['hotel_id'], 
-    'url': hotel["hotel_data"]['url'], 
-    'image': hotel["hotel_data"]["hotel_photos"][0]["url_original"],
-    'price': hotel["room_data"][0]["room_info"]["min_price"],
-    'currency': hotel["hotel_data"]['currency'],
-    'score': hotel["hotel_data"]["review_score"]
-  })
-  return top_hotels
-
+# Retrieve all accessible hotels ('facilities_for_disabled' value in the 'hotel_facility_type_ids' field) using  the hotels endpoint as hotel_id array
 def get_accessible_hotels_by_city_id(city_id):
   # API credentials
   session = requests.Session()
@@ -57,21 +13,22 @@ def get_accessible_hotels_by_city_id(city_id):
   # initialize loop parameters to iterate to all hotels of a city
   offset = 0
   hotels_length = 1000 
-  hotels = []
+  hotels_ids = []
 
-  # calls API x times, where x is the total number of pages existent
+  # iterate through all pages of hotels in a city
   while hotels_length == 1000:
-    api_url = "https://distribution-xml.booking.com/2.4/json/hotels?offset="+str(offset)+"&rows=1000&city_ids=" + city_id + "&hotel_facility_type_ids=25&extras=hotel_info,hotel_photos,room_info"
+    api_url = "https://distribution-xml.booking.com/2.4/json/hotels?offset="+str(offset)+"&rows=1000&city_ids=" + city_id + "&hotel_facility_type_ids=25"
 
     hotels_response = session.get(api_url).json()['result']
     for hotel in hotels_response:
-      hotels.append(hotel)
+      hotels_ids.append(str(hotel['hotel_id']))
 
     offset += 1000
     hotels_length = len(hotels_response)
 
-  return hotels
+  return hotels_ids
 
+# Retrive all reviews of a hotel. It returns a dict with all pros and cons of the hotel in an array of reviews 
 def get_user_reviews_by_hotel_id(hotel_id):
   session = requests.Session()
   session.auth = ('wladimirgramacho', 'nO#1A128ne55U^^Da6')
@@ -83,10 +40,17 @@ def get_user_reviews_by_hotel_id(hotel_id):
     'cons': []
   }
 
+  # Iterate through all pages of reviews in a hotel.
   while results_length == 100:
-    api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + str(hotel_id) 
+    # headline_word_count=0 field makes the text of the reviews truncate > 200 characters (maximum value given by the API backend)
+    api_url = "https://distribution-xml.booking.com/2.4/json/reviews?offset="+ str(offset) + "&rows=100&headline_word_count=0&hotel_ids=" + hotel_id 
     
-    reviews_response = session.get(api_url).json()['result']
+    reviews_response = session.get(api_url).json()
+    if reviews_response:
+      reviews_response = reviews_response['result']
+    else:
+      offset += 100
+      continue
     for review in reviews_response:
       if review['pros']:
         user_reviews['pros'].append(review['pros'])
@@ -96,30 +60,31 @@ def get_user_reviews_by_hotel_id(hotel_id):
     offset += 100
   return user_reviews
 
+# Used to clean the text of a review so it will be ready to be sent to the chatbot
 def clean_review(review):
   # remove new lines and extra spaces
-  review = re.sub(r'\n', ' ', review.strip())
+  review = re.sub(r'\s+', ' ', review.strip())
   # convert ponctuation
   review = re.sub(r'&#39;', "'", review)
-  review = re.sub(r'&#47;', "'", review)
+  review = re.sub(r'&#47;', "/", review)
   review = re.sub(r'&quot;', '"', review)
   return review
 
+# Check if review contains words that talk about accessibility in a bad way
 def find_cons_keywords(review):
   regexs = ([
     re.compile("accessibility|not accessible|weren't accessible|isn't accessible|aren't accessible"),
-    re.compile("narrow.*stairs|stairs.*narrow|steep.*stairs|stairs.*steep|reachable.*stairs|stairs.*reachable"),
     re.compile("\bwheelchair\b")
   ]) 
   has_keyword = False
   for r in regexs:
     found_expression = re.search(r, review.lower())
-    # check if any of the keywords were found
     if found_expression:
       has_keyword = True
 
   return has_keyword
 
+# Check if review contains words that talk about accessibility in a good way
 def find_pros_keywords(review):
   regexs = ([
     re.compile("disabled"),
@@ -128,12 +93,12 @@ def find_pros_keywords(review):
   has_keyword = False
   for r in regexs:
     found_expression = re.search(r, review.lower())
-    # check if any of the keywords were found
     if found_expression:
       has_keyword = True
 
   return has_keyword
 
+# Get all reviews that talk about accessibility of a hotel user reviews and returns it in a dict of pros and cons
 def analize_user_review(user_reviews):
   cons = user_reviews['cons']
   cons_reviews = []
@@ -152,7 +117,8 @@ def analize_user_review(user_reviews):
     'pros': pros_reviews
   })
 
-def npl_accessibility_analysis(hotel_id):
+# Get all reviews that talk about accessibility, given a hotel_id and returns it in a dict of negative and positive reviews
+def analize_hotel_reviews(hotel_id):
   negative_reviews = []
   positive_reviews = []
 
@@ -169,24 +135,37 @@ def npl_accessibility_analysis(hotel_id):
     'positive_reviews': positive_reviews
   })
 
-def test_hotels_from_city(city_id):
+# Get all reviews that talk about accessibility of each hotel in a city, returns an array of dicts with the hotel id and its reviews about accessibility, then saves it all in a json file that is used as cache to improve performance
+def analize_city_hotel_reviews(city_id):
   hotel_ids = get_accessible_hotels_by_city_id(city_id)
-  negative_reviews = []
-  positive_reviews = []
+
+  analysis = []
   total = 0
-
   for hotel_id in hotel_ids:
+    hotel = {}
+    hotel["hotel_id"] = hotel_id
     reviews_array = get_user_reviews_by_hotel_id(hotel_id)
-    analysis_result = analize_user_review(reviews_array)
-    if analysis_result['cons']:
-      negative_reviews.append(analysis_result['cons'])
-    if analysis_result['pros']:
-      positive_reviews.append(analysis_result['pros'])
-    total +=1
-  return ({
-    'negative_reviews': negative_reviews, 
-    'positive_reviews': positive_reviews
-  })
+    hotel["review"] = analize_user_review(reviews_array)
+    analysis.append(hotel)
+    total += 1
+    print(total)
 
-res = main({'city': 'amsterdam'})
+  with open('reviews.json', 'w') as outfile:  
+    json.dump(analysis, outfile)
+
+# Test function used to open json file and retrieve all reviews of the hotel
+def static_review_analysis(hotel_id):
+  with open('reviews.json') as json_file:  
+    static_reviews = json.load(json_file)
+  hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == hotel_id]  
+  return hotel_review[0]
+
+analize_city_hotel_reviews('-246227')
+# res = static_review_analysis('10098')
 import pdb; pdb.set_trace()
+
+# res = analize_hotel_reviews('11318')
+# import pdb; pdb.set_trace()
+
+# res = get_user_reviews_by_hotel_id('11318')
+# import pdb; pdb.set_trace()
