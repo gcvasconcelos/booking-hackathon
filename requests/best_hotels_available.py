@@ -1,20 +1,17 @@
+# This function is deployed in IBM cloud functions
+
 import requests
 import re
 import json
 
+# The following funcions were only implemented and tested to this city_ids. This could be retrieved using the hotel endpoint, but they were saved in memory due to performance issues
 CITY_IDS = {
   'amsterdam': "-2140479",
   'tokyo': "-246227",
   'berlin': "-1746443"
 }
 
-POSITIONS = [
-  'first',
-  'second',
-  'third'
-]
-
-
+# Name of the hotel facilities needed for each type of disability needed by the API call in the hotelAvailability endpoint
 MOBILITY = {
   "walk" : {
     "hotel_facilities" : "facilities_for_disabled",
@@ -30,6 +27,7 @@ MOBILITY = {
   }
 }
 
+# Main function with unique hash return required by the cloud function documentation. The return is the three best available hotels chosen by the platform to an user, each with its name, id, url, image, price, currency, score and a string with a positive review about it. The paremeters are the destination city_id, check_in and check_out dates and what type of accessibility needs the user has.
 def main(param):
   hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']], param['check_in'], param['check_out'], param['mobility'])   
   return {
@@ -38,7 +36,7 @@ def main(param):
     'third': hotels[2] 
   }
 
-
+# Retrieve all reviews about accessibility and returns them as a ditc of pros and cons reviews
 def static_review_analysis(hotel_id, static_reviews):
   hotel_review = [review['review'] for review in static_reviews if review['hotel_id'] == str(hotel_id)]  
   if hotel_review:
@@ -47,6 +45,7 @@ def static_review_analysis(hotel_id, static_reviews):
       'negative_reviews': hotel_review[0]['cons']
     }
 
+# Get the top 3 best available hotels of a city. To get the best we select the ones which have most postive reviews about accessibility and return an array of three hotels, with some extra information to show to the user, like photo, url, name, id, price, type of currency and score. It retrives the accessibility reviews already calculated and exported to a json (in analysis/review_analysis.py) from AWS
 def get_best_hotels_by_city_id(city_id, check_in, check_out, mobility):
   hotels = get_accessible_hotels_by_city_id(city_id, check_in, check_out, mobility)
   top_n_hotels = []
@@ -60,6 +59,7 @@ def get_best_hotels_by_city_id(city_id, check_in, check_out, mobility):
     if hotel['accessibility_review']['positive_reviews'] == []:
       hotels.remove(hotel)
 
+  # three best hotels
   for i in range(3):
     top_hotel = max(hotels, key=lambda hotel:len(hotel["accessibility_review"]["positive_reviews"]))
     top_n_hotels.append(top_hotel)
@@ -88,6 +88,7 @@ def get_best_hotels_by_city_id(city_id, check_in, check_out, mobility):
   })
   return top_hotels
 
+# Using the hotelAvailability endpoint we retrieve all available accessible hotels 
 def get_accessible_hotels_by_city_id(city_id, check_in, check_out, mobility):
   # API credentials
   session = requests.Session()
@@ -110,5 +111,5 @@ def get_accessible_hotels_by_city_id(city_id, check_in, check_out, mobility):
     hotels_length = len(hotels_response)
   return hotels
 
-res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26', 'mobility': 'wheelchair'})
-import pdb; pdb.set_trace()
+# res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26', 'mobility': 'wheelchair'})
+# import pdb; pdb.set_trace()
