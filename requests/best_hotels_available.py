@@ -12,8 +12,30 @@ CITY_IDS = {
 }
 
 # Main function with unique hash return required by the cloud function documentation. The return is the three best available hotels chosen by the platform to an user, each with its name, id, url, image, price, currency, score and a string with a positive review about it. The paremeters are the destination city_id, check_in and check_out dates and what type of accessibility needs the user has.
+POSITIONS = [
+  'first',
+  'second',
+  'third'
+]
+
+
+MOBILITY = {
+  "walk" : {
+    "hotel_facilities" : "facilities_for_disabled",
+    "room_facilities" : "upper_floors_accessible_by_lift,toilet_with_grab_rails,walk_in_shower,emergency_cord_in_bathroom,accessible_by_lift"
+  },
+  "stand" : {
+    "hotel_facilities" : "facilities_for_disabled",
+    "room_facilities" : "upper_floors_accessible_by_lift,entire_unit_wheelchair_accessible,toilet_with_grab_rails,adapted_bath,walk_in_shower,lowered_sink,emergency_cord_in_bathroom,shower_chair,accessible_by_lift"
+  },
+  "wheelchair" : {
+    "hotel_facilities" : "facilities_for_disabled",
+    "room_facilities" : "upper_floors_accessible_by_lift,entire_unit_wheelchair_accessible,toilet_with_grab_rails,adapted_bath,roll_in_shower,raised_toilet,lowered_sink,emergency_cord_in_bathroom,shower_chair,accessible_by_lift"
+  }
+}
+
 def main(param):
-  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']], param['check_in'], param['check_out'])   
+  hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']], param['check_in'], param['check_out'], param['mobility'])   
   return {
     'first': hotels[0], 
     'second': hotels[1], 
@@ -29,8 +51,8 @@ def static_review_analysis(hotel_id, static_reviews):
       'negative_reviews': hotel_review[0]['cons']
     }
 
-def get_best_hotels_by_city_id(city_id, check_in, check_out):
-  hotels = get_accessible_hotels_by_city_id(city_id, check_in, check_out)
+def get_best_hotels_by_city_id(city_id, check_in, check_out, mobility):
+  hotels = get_accessible_hotels_by_city_id(city_id, check_in, check_out, mobility)
   top_n_hotels = []
 
   json_name = "https://dream-team-booking.s3.amazonaws.com/" + list(CITY_IDS.keys())[list(CITY_IDS.values()).index(city_id)] + "_reviews.json"
@@ -70,7 +92,7 @@ def get_best_hotels_by_city_id(city_id, check_in, check_out):
   })
   return top_hotels
 
-def get_accessible_hotels_by_city_id(city_id, check_in, check_out):
+def get_accessible_hotels_by_city_id(city_id, check_in, check_out, mobility):
   # API credentials
   session = requests.Session()
   session.auth = ('wladimirgramacho', 'nO#1A128ne55U^^Da6')
@@ -82,7 +104,7 @@ def get_accessible_hotels_by_city_id(city_id, check_in, check_out):
 
   # calls API x times, where x is the total number of pages existent
   while hotels_length == 1000:
-    api_url = "https://distribution-xml.booking.com/2.4/json/hotelAvailability?offset=" + str(offset) + "&rows=1000&checkin=" + str(check_in) + "&checkout="+ str(check_out) + "&city_ids=" + str(city_id) + "&hotel_facilities=" + "facilities_for_disabled" + "&room1=A,A&extras=hotel_details"
+    api_url = "https://distribution-xml.booking.com/2.4/json/hotelAvailability?offset=" + str(offset) + "&rows=1000&checkin=" + str(check_in) + "&checkout="+ str(check_out) + "&city_ids=" + str(city_id) + "&hotel_facilities=" + str(MOBILITY[mobility]['hotel_facilities']) + "&room1=A,A&extras=hotel_details"
 
     hotels_response = session.get(api_url).json()['result']
     for hotel in hotels_response:
@@ -92,5 +114,5 @@ def get_accessible_hotels_by_city_id(city_id, check_in, check_out):
     hotels_length = len(hotels_response)
   return hotels
 
-res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26'})
+res = main({'city': 'amsterdam', 'check_in': '2019-09-25', 'check_out': '2019-09-26', 'mobility': 'wheelchair'})
 import pdb; pdb.set_trace()
