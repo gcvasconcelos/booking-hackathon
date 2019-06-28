@@ -1,19 +1,17 @@
+# This function is deployed in IBM cloud functions
+
 import requests
 import re
 import json
 
+# The following funcions were only implemented and tested to this city_ids. This could be retrieved using the hotel endpoint, but they were saved in memory due to performance issues
 CITY_IDS = {
-    'amsterdam': "-2140479",
-    'tokyo': "-246227",
-    'berlin': "-1746443"
+  'amsterdam': "-2140479",
+  'tokyo': "-246227",
+  'berlin': "-1746443"
 }
 
-POSITIONS = [
-    'first',
-    'second',
-    'third'
-]
-
+# Main function with unique hash return required by the cloud function documentation. The return is the three best available hotels chosen by the platform to an user, each with its name, id, url, image, price, currency, score and a string with a positive review about it. The paremeters are the destination city_id, check_in and check_out dates and what type of accessibility needs the user has.
 def main(param):
   hotels = get_best_hotels_by_city_id(CITY_IDS[param['city']], param['check_in'], param['check_out'])   
   return {

@@ -1,12 +1,16 @@
+# This function is deployed in IBM cloud functions
+
 require 'net/http'
 require 'json'
 require 'csv'
 require 'open-uri'
 
+# Main function with unique hash return required by the cloud function documentation. The return is a hash with string stating the visa requirements between two cities. The parameters are the origin country and destination country in ISO alpha-2
 def main(param)
  get_visa_requirements(param['country_name'].capitalize, param['target_country_id'])
 end
 
+# Retrieve country id in a json hosted in AWS function using the country name (ISO alpha-2)
 def get_country_id(country_name)
  uri = URI('https://s3.amazonaws.com/dream-team-booking/countries.json')
  json = Net::HTTP.get_response(uri)
@@ -16,6 +20,7 @@ def get_country_id(country_name)
  country["alpha-2"].downcase
 end
 
+# Retrieve a string with the visa requirements between two countries, using a csv file with a kind of confusion matrix of contries, all rows (origin country) and column (destination coountry) indexes are a list of countries in alphabetical order in witch each value is a code ranging -1 to 3, signifing the visa requirements
 def get_visa_requirements(country_name, target_country_id)
  uri = URI('https://s3.amazonaws.com/dream-team-booking/visa.csv')
  csv = Net::HTTP.get_response(uri)

@@ -1,8 +1,8 @@
 require 'rest-client'
 require 'json'
 
-# return the number of accessible hotels in a city
-def get_accessible_hotels_by_city_id(city_id)
+# Retrive the number of accessible hotels in a city using the Hotels endpoint. The accessibility of a hotel is defined by the 'facilities_for_disable' value of the 'hotel_facility_type_ids' field (this information is provided by the hotel)
+def get_accessible_hotels(city_id)
 	offset = 0
 	n_of_hotels = 0
 	hotels = 1000
@@ -23,8 +23,8 @@ def get_accessible_hotels_by_city_id(city_id)
 	n_of_hotels
 end
 
-# return the number of hotels in a city
-def get_hotels_by_city_id(city_id)
+# Retrive the number of hotels in a city using the Hotels endpoint
+def get_all_hotels(city_id)
 	offset = 0
 	n_of_hotels = 0
 	hotels = 1000
@@ -45,13 +45,13 @@ def get_hotels_by_city_id(city_id)
 	n_of_hotels
 end
 
-# returns the percentage of accessible hotels of a city
-def get_accessibility_percentage_by_city(city_id)
-	accessible_hotels = get_accessible_hotels_by_city_id(city_id)
-	hotels = get_hotels_by_city_id(city_id)
+# Returns the percentage of accessible hotels of a city using the number of accessible hotels divided by the total number of hotels in a city
+def get_accessibility_percentage(city_id)
+	accessible_hotels = get_accessible_hotels(city_id)
+	hotels = get_all_hotels(city_id)
 	
 	accessible_hotels.to_f / hotels * 100
 end
 
-# usage example using Amsterdam code
-# puts get_accessibility_percentage_by_city(-2140479)
+# usage example using Amsterdam code:
+# puts get_accessibility_percentage(-2140479)
