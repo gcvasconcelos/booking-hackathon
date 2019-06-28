@@ -1,3 +1,5 @@
+# This function was NOT used in the chatbot
+
 require 'rest-client'
 require 'json'
 
