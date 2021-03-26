@@ -6,7 +6,7 @@ The functions make specific requests to be called inside the chatbot. The reques
 
 ## Usage
 
-To use these functions simply execute them. To make it available to the bot to see, we recommend uploading to a platform with a serveless service such as AWS or IBM. This code is within the framework required to run in (IBM Cloud Functions.)[https://cloud.ibm.com/openwhisk]
+To use these functions simply execute them. To make it available to the bot to see, we recommend uploading to a platform with a serveless service such as AWS or IBM. This code is within the framework required to run in [IBM Cloud Functions.](https://cloud.ibm.com/openwhisk)
 
 ## Functions
 ### Weather
